@@ -1,1 +1,1 @@
-# AI-A-coding
+print("Hello, world!")
