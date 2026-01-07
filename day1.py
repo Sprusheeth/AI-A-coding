@@ -14,3 +14,11 @@ def fibonacci_series(n):
         next_value = fib_series[-1] + fib_series[-2]
         fib_series.append(next_value)
     return fib_series[:n]
+
+# write a program to check perfect number
+def is_perfect_number(num):
+    if num < 1:
+        return False
+    divisors_sum = sum(i for i in range(1, num) if num % i == 0)
+    return divisors_sum == num
+
