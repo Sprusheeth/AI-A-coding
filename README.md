@@ -5,6 +5,7 @@ This repository/folder contains a set of PDF documents related to coursework, as
 The following PDF files are included:
 
 - `2303A51206_1.2.pdf`
+- `2303A51206-1.5.pdf`
 - `2303A51206_2.2.pdf`
 - `2303A51206_2.5.pdf`
 - `2303A51206_3.2.pdf`
@@ -22,6 +23,7 @@ These files may include:
 | Section | PDF |
 |--------|-----|
 | 1.2 | [2303A51206_1.2.pdf](2303A51206_1.2.pdf) |
+| 1.5 | [2303A51206_1.5.pdf](2303A51206-1.5.pdf) |
 | 2.2 | [2303A51206_2.2.pdf](2303A51206_2.2.pdf) |
 | 2.5 | [2303A51206_2.5.pdf](2303A51206_2.5.pdf) |
 | 3.2 | [2303A51206_3.2.pdf](2303A51206_3.2.pdf) |
