@@ -17,7 +17,7 @@ These files may include:
 - Reports
 - Notes
 - Supporting documentation
-- 
+  
 ## 📘 Documents
 
 | Section | PDF |
