@@ -11,6 +11,7 @@ The following PDF files are included:
 - `2303A51206_3.2.pdf`
 - `2303A51206_3.5.pdf`
 - `2303A51206_5.5.pdf`
+- `2303A51206_7.5.pdf`
 
 These files may include:
 - Assignments
@@ -29,3 +30,4 @@ These files may include:
 | 3.2 | [2303A51206_3.2.pdf](2303A51206_3.2.pdf) |
 | 3.5 | [2303A51206_3.5.pdf](2303A51206_3.5.pdf) |
 | 5.5 | [2303A51206_5.5.pdf](2303A51206_5.5.pdf) |
+| 7.5 | [2303A51206_7.5.pdf](2303A51206_7.5.pdf) |
