@@ -13,6 +13,8 @@ The following PDF files are included:
 - `2303A51206_5.5.pdf`
 - `2303A51206_7.5.pdf`
 - `2303A51206_8.2.pdf`
+- `2303A51206_10.5.pdf`
+- `2303A51206 11.5.pdf`
 
 These files may include:
 - Assignments
