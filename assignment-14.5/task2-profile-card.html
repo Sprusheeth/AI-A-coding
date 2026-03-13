@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Profile Card Generator</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #e8f0fe;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #3d3d5c;
+      margin-bottom: 2rem;
+      letter-spacing: 1px;
+    }
+
+    .layout {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    /* ─── Card Preview ─── */
+    .card {
+      width: 320px;
+      flex-shrink: 0;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 10px 40px rgba(0,0,0,.15);
+      transition: transform .35s, box-shadow .35s;
+    }
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+    }
+
+    .card-banner {
+      height: 100px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .card-body {
+      padding: 0 1.6rem 1.6rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .avatar-wrap {
+      margin-top: -50px;
+      display: flex;
+      justify-content: center;
+    }
+    .avatar-wrap img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #fff;
+      box-shadow: 0 4px 14px rgba(0,0,0,.2);
+    }
+
+    .card-name {
+      margin-top: .8rem;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+    .card-role {
+      font-size: .9rem;
+      color: #764ba2;
+      font-weight: 600;
+      margin-top: .2rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .card-bio {
+      margin-top: .8rem;
+      font-size: .85rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 1.2rem 0;
+      padding: 1rem 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+    .stat { text-align: center; }
+    .stat-val { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
+    .stat-lbl { font-size: .72rem; color: #999; }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      color: #444;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background .25s, color .25s, transform .25s;
+    }
+    .social-links a:hover { transform: scale(1.2); }
+    .social-links a.github:hover  { background: #24292e; color: #fff; }
+    .social-links a.linkedin:hover{ background: #0077b5; color: #fff; }
+    .social-links a.twitter:hover { background: #1da1f2; color: #fff; }
+    .social-links a.instagram:hover{ background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); color: #fff; }
+
+    /* ─── Editor Form ─── */
+    .editor {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.8rem;
+      box-shadow: 0 6px 24px rgba(0,0,0,.1);
+      flex: 1;
+      min-width: 280px;
+      max-width: 420px;
+    }
+    .editor h2 { font-size: 1.1rem; color: #3d3d5c; margin-bottom: 1.2rem; }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: .35rem;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: .55rem .8rem;
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-family: inherit;
+      transition: border-color .2s;
+      outline: none;
+      resize: vertical;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #764ba2;
+    }
+
+    .color-row {
+      display: flex;
+      gap: .6rem;
+      align-items: center;
+    }
+    .color-row input[type="color"] {
+      width: 44px;
+      height: 36px;
+      padding: 2px;
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-download {
+      width: 100%;
+      margin-top: 1.2rem;
+      padding: .75rem;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: .5px;
+      transition: opacity .2s;
+    }
+    .btn-download:hover { opacity: .88; }
+
+    /* Card themes */
+    .theme-ocean  .card-banner { background: linear-gradient(135deg,#43b89c,#2980b9); }
+    .theme-sunset .card-banner { background: linear-gradient(135deg,#f7971e,#f64f59); }
+    .theme-night  .card-banner { background: linear-gradient(135deg,#141e30,#243b55); }
+    .theme-rose   .card-banner { background: linear-gradient(135deg,#f953c6,#b91d73); }
+
+    @media(max-width:600px){ .layout{ flex-direction: column; align-items: center; } }
+  </style>
+</head>
+<body>
+
+<h1>Profile Card Generator</h1>
+
+<div class="layout">
+
+  <!-- Live Card Preview -->
+  <div class="card-wrapper" id="cardWrapper">
+    <div class="card" id="previewCard">
+      <div class="card-banner" id="cardBanner"></div>
+      <div class="card-body">
+        <div class="avatar-wrap">
+          <img id="previewAvatar" src="https://i.pravatar.cc/200?img=5" alt="Avatar"/>
+        </div>
+        <div class="card-name" id="previewName">Jane Doe</div>
+        <div class="card-role" id="previewRole">UI / UX Designer</div>
+        <div class="card-bio" id="previewBio">Passionate about crafting beautiful digital experiences. Coffee lover &amp; weekend hiker.</div>
+        <div class="card-stats">
+          <div class="stat"><div class="stat-val" id="previewFollowers">1.2K</div><div class="stat-lbl">Followers</div></div>
+          <div class="stat"><div class="stat-val" id="previewProjects">48</div><div class="stat-lbl">Projects</div></div>
+          <div class="stat"><div class="stat-val" id="previewLikes">320</div><div class="stat-lbl">Likes</div></div>
+        </div>
+        <div class="social-links">
+          <a id="lnkGithub"    class="github"    href="#" target="_blank" rel="noopener" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a id="lnkLinkedin"  class="linkedin"  href="#" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a id="lnkTwitter"   class="twitter"   href="#" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a id="lnkInstagram" class="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="editor">
+    <h2>&#9998; Customize Card</h2>
+
+    <div class="form-group">
+      <label for="inName">Full Name</label>
+      <input id="inName" type="text" value="Jane Doe" placeholder="Your name"/>
+    </div>
+    <div class="form-group">
+      <label for="inRole">Role / Title</label>
+      <input id="inRole" type="text" value="UI / UX Designer" placeholder="Your role"/>
+    </div>
+    <div class="form-group">
+      <label for="inBio">Bio</label>
+      <textarea id="inBio" rows="3">Passionate about crafting beautiful digital experiences. Coffee lover &amp; weekend hiker.</textarea>
+    </div>
+    <div class="form-group">
+      <label for="inAvatar">Avatar URL</label>
+      <input id="inAvatar" type="url" value="https://i.pravatar.cc/200?img=5" placeholder="Image URL"/>
+    </div>
+
+    <div class="form-group">
+      <label>Banner Gradient</label>
+      <div class="color-row">
+        <input type="color" id="col1" value="#667eea"/>
+        <input type="color" id="col2" value="#764ba2"/>
+        <select id="gradDir">
+          <option value="135deg">Diagonal ↘</option>
+          <option value="90deg">Horizontal →</option>
+          <option value="180deg">Vertical ↓</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="inFollowers">Followers</label>
+      <input id="inFollowers" type="text" value="1.2K"/>
+    </div>
+    <div class="form-group">
+      <label for="inProjects">Projects</label>
+      <input id="inProjects" type="text" value="48"/>
+    </div>
+    <div class="form-group">
+      <label for="inLikes">Likes</label>
+      <input id="inLikes" type="text" value="320"/>
+    </div>
+
+    <div class="form-group">
+      <label for="inGithub">GitHub URL</label>
+      <input id="inGithub" type="url" placeholder="https://github.com/…"/>
+    </div>
+    <div class="form-group">
+      <label for="inLinkedin">LinkedIn URL</label>
+      <input id="inLinkedin" type="url" placeholder="https://linkedin.com/in/…"/>
+    </div>
+    <div class="form-group">
+      <label for="inTwitter">Twitter URL</label>
+      <input id="inTwitter" type="url" placeholder="https://twitter.com/…"/>
+    </div>
+    <div class="form-group">
+      <label for="inInstagram">Instagram URL</label>
+      <input id="inInstagram" type="url" placeholder="https://instagram.com/…"/>
+    </div>
+
+    <button class="btn-download" onclick="copyCardHTML()">&#128203; Copy Card HTML</button>
+  </div>
+
+</div>
+
+<script>
+  const bind = (inputId, updateFn) => {
+    const el = document.getElementById(inputId);
+    el.addEventListener("input", () => updateFn(el.value));
+    updateFn(el.value);
+  };
+
+  bind("inName",      v => document.getElementById("previewName").textContent = v);
+  bind("inRole",      v => document.getElementById("previewRole").textContent = v);
+  bind("inBio",       v => document.getElementById("previewBio").textContent = v);
+  bind("inAvatar",    v => { document.getElementById("previewAvatar").src = v; });
+  bind("inFollowers", v => document.getElementById("previewFollowers").textContent = v);
+  bind("inProjects",  v => document.getElementById("previewProjects").textContent = v);
+  bind("inLikes",     v => document.getElementById("previewLikes").textContent = v);
+
+  bind("inGithub",    v => document.getElementById("lnkGithub").href    = v || "#");
+  bind("inLinkedin",  v => document.getElementById("lnkLinkedin").href  = v || "#");
+  bind("inTwitter",   v => document.getElementById("lnkTwitter").href   = v || "#");
+  bind("inInstagram", v => document.getElementById("lnkInstagram").href = v || "#");
+
+  function updateBanner() {
+    const c1  = document.getElementById("col1").value;
+    const c2  = document.getElementById("col2").value;
+    const dir = document.getElementById("gradDir").value;
+    document.getElementById("cardBanner").style.background =
+      `linear-gradient(${dir}, ${c1} 0%, ${c2} 100%)`;
+  }
+  ["col1","col2","gradDir"].forEach(id =>
+    document.getElementById(id).addEventListener("input", updateBanner));
+  updateBanner();
+
+  function copyCardHTML() {
+    const html = document.getElementById("previewCard").outerHTML;
+    navigator.clipboard.writeText(html).then(() => {
+      alert("Card HTML copied to clipboard!");
+    }).catch(() => {
+      prompt("Copy the HTML below:", html);
+    });
+  }
+</script>
+</body>
+</html>

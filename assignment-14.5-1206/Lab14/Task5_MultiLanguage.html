@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 5 - Multi Language Website</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1 data-i18n="title">Multi-Language Website</h1>
+      <p data-i18n="subtitle">Switch language and keep your preference saved.</p>
+    </header>
+
+    <section class="panel language-box">
+      <header>
+        <label for="languageSelect"><strong>Choose Language</strong></label>
+        <select id="languageSelect" aria-label="Language selector">
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="ar">Arabic</option>
+        </select>
+      </header>
+
+      <article>
+        <h2 data-i18n="heading">Welcome to our learning portal</h2>
+        <p data-i18n="paragraph">This page updates text instantly using JavaScript translation objects.</p>
+        <button class="btn btn-accent" type="button" data-i18n="button">Read More</button>
+      </article>
+    </section>
+  </main>
+
+  <script src="js/language.js"></script>
+</body>
+</html>

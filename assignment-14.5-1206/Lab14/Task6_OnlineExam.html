@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 6 - Online Examination System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Task 6: Online Examination System</h1>
+      <p>Timed MCQ exam with navigation, score calculation, and one-time submission protection.</p>
+    </header>
+
+    <section class="panel exam-shell" aria-label="Online exam">
+      <div class="exam-top">
+        <div>
+          <strong id="questionCount">Question 1 of 5</strong>
+        </div>
+        <div class="timer" id="timer">03:00</div>
+      </div>
+
+      <article class="question-box">
+        <h2 id="questionText">Loading question...</h2>
+        <form class="options" id="options" aria-label="Question options"></form>
+      </article>
+
+      <nav class="nav-row" aria-label="Exam controls">
+        <button class="btn btn-primary" id="prevBtn" type="button">Previous</button>
+        <button class="btn btn-primary" id="nextBtn" type="button">Next</button>
+        <button class="btn btn-accent" id="submitBtn" type="button">Submit Exam</button>
+        <button class="btn btn-danger" id="resetExam" type="button">Reset Exam</button>
+      </nav>
+
+      <p class="result" id="result" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <script src="js/exam.js"></script>
+</body>
+</html>

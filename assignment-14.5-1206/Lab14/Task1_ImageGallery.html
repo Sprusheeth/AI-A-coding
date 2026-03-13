@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 1 - Image Gallery</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Task 1: Responsive Image Gallery</h1>
+      <p>CSS Grid layout with hover zoom and modal preview.</p>
+    </header>
+
+    <section class="panel" aria-label="Image gallery">
+      <div class="gallery-grid">
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-1/1200/800" data-alt="Mountain valley"><img src="https://picsum.photos/seed/lab14-1/500/350" alt="Mountain valley"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-2/1200/800" data-alt="Forest road"><img src="https://picsum.photos/seed/lab14-2/500/350" alt="Forest road"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-3/1200/800" data-alt="City skyline"><img src="https://picsum.photos/seed/lab14-3/500/350" alt="City skyline"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-4/1200/800" data-alt="Lake and trees"><img src="https://picsum.photos/seed/lab14-4/500/350" alt="Lake and trees"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-5/1200/800" data-alt="Beach sunset"><img src="https://picsum.photos/seed/lab14-5/500/350" alt="Beach sunset"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-6/1200/800" data-alt="Desert dunes"><img src="https://picsum.photos/seed/lab14-6/500/350" alt="Desert dunes"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-7/1200/800" data-alt="Snow mountain"><img src="https://picsum.photos/seed/lab14-7/500/350" alt="Snow mountain"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-8/1200/800" data-alt="Bridge view"><img src="https://picsum.photos/seed/lab14-8/500/350" alt="Bridge view"></button></figure>
+        <figure class="gallery-item"><button data-full="https://picsum.photos/seed/lab14-9/1200/800" data-alt="Night lights"><img src="https://picsum.photos/seed/lab14-9/500/350" alt="Night lights"></button></figure>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="galleryModal" aria-hidden="true" role="dialog" aria-label="Image preview">
+    <div class="modal-content">
+      <button class="btn btn-danger modal-close" id="closeModal" type="button">Close</button>
+      <img id="modalImage" src="" alt="Preview image">
+    </div>
+  </div>
+
+  <script src="js/gallery.js"></script>
+</body>
+</html>

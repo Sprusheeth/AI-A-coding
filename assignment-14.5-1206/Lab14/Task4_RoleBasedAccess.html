@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 4 - Role Based Access Control</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Task 4: Role Based Access Control</h1>
+      <p>Simulate login and reveal dashboard components based on role permissions.</p>
+    </header>
+
+    <section class="role-layout">
+      <section class="auth-box" aria-label="Role login">
+        <h2>Login Simulation</h2>
+        <label for="roleSelect">Select role</label>
+        <select id="roleSelect">
+          <option value="Admin">Admin</option>
+          <option value="Editor">Editor</option>
+          <option value="User">User</option>
+        </select>
+        <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary" id="loginBtn" type="button">Login</button>
+          <button class="btn btn-danger" id="logoutBtn" type="button">Logout</button>
+        </div>
+        <p style="margin-top: 0.8rem;">Current Role: <span id="currentRole" class="badge">Not logged in</span></p>
+      </section>
+
+      <section class="role-card" aria-label="Protected modules">
+        <h2>Dashboard Modules</h2>
+        <div class="permissions">
+          <article class="permission-item" data-permission="view">
+            <h3>View Analytics</h3>
+            <p>Basic dashboard and read-only insights.</p>
+          </article>
+          <article class="permission-item" data-permission="edit">
+            <h3>Edit Content</h3>
+            <p>Modify pages, update media, and publish content changes.</p>
+          </article>
+          <article class="permission-item" data-permission="admin">
+            <h3>Admin Settings</h3>
+            <p>Access user management, permissions, and system configuration.</p>
+          </article>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="js/roles.js"></script>
+</body>
+</html>

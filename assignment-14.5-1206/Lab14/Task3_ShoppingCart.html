@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 3 - Shopping Cart</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1>Task 3: Dynamic Shopping Cart</h1>
+      <p>Add products, update quantities, and track real-time totals with localStorage.</p>
+    </header>
+
+    <section class="shop-layout">
+      <section class="panel" aria-label="Product list">
+        <h2>Products</h2>
+        <div class="products-grid" id="products"></div>
+      </section>
+
+      <aside class="panel" aria-label="Cart summary">
+        <h2>Your Cart</h2>
+        <div class="cart-list" id="cartItems"></div>
+        <div class="total-row">
+          <span>Total</span>
+          <span id="totalPrice">$0.00</span>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="js/cart.js"></script>
+</body>
+</html>

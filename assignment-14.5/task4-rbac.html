@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Role-Based Access Control</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --admin:  #e53e3e;
+      --editor: #d69e2e;
+      --user:   #3182ce;
+      --dark:   #1a202c;
+      --panel:  #fff;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #edf2f7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── TOP BAR ─── */
+    .topbar {
+      background: var(--dark);
+      padding: .9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .6rem;
+    }
+    .topbar .brand { color: #fff; font-size: 1.2rem; font-weight: 700; }
+    .topbar .user-info {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      color: #fff;
+      font-size: .9rem;
+    }
+    .role-badge {
+      padding: .25rem .75rem;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .badge-admin  { background: var(--admin);  color: #fff; }
+    .badge-editor { background: var(--editor); color: #fff; }
+    .badge-user   { background: var(--user);   color: #fff; }
+
+    .btn-logout {
+      padding: .35rem .9rem;
+      background: transparent;
+      border: 1.5px solid #fff;
+      color: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .82rem;
+      transition: background .2s;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.15); }
+
+    /* ─── AUTH SCREEN ─── */
+    #authScreen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .auth-box {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+    }
+    .auth-box h2 { font-size: 1.5rem; color: var(--dark); margin-bottom: .4rem; }
+    .auth-box p  { color: #718096; font-size: .88rem; margin-bottom: 1.8rem; }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block; font-size: .82rem; font-weight: 600;
+      color: #4a5568; margin-bottom: .35rem;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: .6rem .9rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus { border-color: #3182ce; }
+
+    .btn-login {
+      width: 100%;
+      padding: .75rem;
+      background: var(--dark);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+    }
+    .btn-login:hover { opacity: .85; }
+    .auth-err { color: var(--admin); font-size: .83rem; margin-top: .6rem; min-height: 1.1em; }
+
+    .demo-accounts {
+      margin-top: 1.4rem;
+      background: #f7fafc;
+      border-radius: 10px;
+      padding: 1rem;
+      font-size: .8rem;
+      color: #4a5568;
+    }
+    .demo-accounts b { color: var(--dark); }
+    .demo-accounts table { border-collapse: collapse; width: 100%; margin-top: .5rem; }
+    .demo-accounts td { padding: .25rem .5rem; }
+    .demo-accounts tr:hover td { background: #edf2f7; cursor: pointer; }
+
+    /* ─── DASHBOARD ─── */
+    #dashboard { display: none; flex: 1; flex-direction: column; }
+
+    .dash-layout {
+      display: flex;
+      flex: 1;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--dark);
+      padding: 1.5rem 0;
+      flex-shrink: 0;
+    }
+    .sidebar .nav-item {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      padding: .75rem 1.5rem;
+      color: #a0aec0;
+      cursor: pointer;
+      font-size: .9rem;
+      transition: background .2s, color .2s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .sidebar .nav-item:hover { background: rgba(255,255,255,.07); color: #fff; }
+    .sidebar .nav-item.active { background: rgba(255,255,255,.12); color: #fff; }
+    .sidebar .nav-item.locked { opacity: .4; cursor: not-allowed; }
+    .sidebar .nav-item .lock-icon { margin-left: auto; font-size: .8rem; }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .page-header h1 { font-size: 1.5rem; color: var(--dark); }
+
+    /* Stat Cards */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+    }
+    .stat-card .sc-val  { font-size: 1.8rem; font-weight: 700; color: var(--dark); }
+    .stat-card .sc-lbl  { font-size: .78rem; color: #718096; margin-top: .2rem; }
+    .stat-card .sc-icon { font-size: 1.5rem; }
+
+    /* Table */
+    .data-table {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      overflow-x: auto;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    th { background: #f7fafc; color: #4a5568; font-weight: 600; text-align: left; padding: .7rem 1rem; }
+    td { padding: .7rem 1rem; border-bottom: 1px solid #f0f0f0; color: #333; }
+    tr:last-child td { border: none; }
+    tr:hover td { background: #f7fafc; }
+
+    /* Action buttons */
+    .action-btn {
+      padding: .3rem .7rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .78rem;
+      font-weight: 600;
+      margin-right: .3rem;
+      transition: opacity .2s;
+    }
+    .action-btn:hover { opacity: .8; }
+    .btn-edit   { background: #ebf4ff; color: var(--user); }
+    .btn-delete { background: #fff5f5; color: var(--admin); }
+    .btn-view   { background: #f0fff4; color: #276749; }
+    .btn-pub    { background: #fffff0; color: #744210; }
+
+    /* Access Badge */
+    .access-section {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      margin-bottom: 1rem;
+    }
+    .access-section h3 { margin-bottom: .8rem; color: var(--dark); }
+    .perm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: .6rem;
+    }
+    .perm-item {
+      padding: .5rem .8rem;
+      border-radius: 8px;
+      font-size: .82rem;
+      display: flex;
+      align-items: center;
+      gap: .4rem;
+    }
+    .perm-allow { background: #f0fff4; color: #276749; }
+    .perm-deny  { background: #fff5f5; color: #c53030; }
+
+    .profile-card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      max-width: 400px;
+    }
+    .profile-card .pc-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+    .profile-card .avatar {
+      width: 60px; height: 60px; border-radius: 50%;
+      background: var(--dark); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700; flex-shrink: 0;
+    }
+    .pc-info .pc-name { font-size: 1.1rem; font-weight: 700; color: var(--dark); }
+    .pc-info .pc-email { font-size: .85rem; color: #718096; }
+
+    /* Access denied panel */
+    .access-denied {
+      text-align: center;
+      padding: 3rem;
+      color: #a0aec0;
+    }
+    .access-denied .icon { font-size: 3rem; }
+    .access-denied p { margin-top: .8rem; font-size: 1rem; }
+
+    @media(max-width:640px) {
+      .sidebar { width: 56px; }
+      .sidebar .nav-item span.label { display: none; }
+      .sidebar .nav-item { justify-content: center; padding: .75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="brand">&#128274; RBAC Portal</div>
+  <div class="user-info" id="topUserInfo" style="display:none">
+    <span id="topUserName">—</span>
+    <span class="role-badge" id="topRoleBadge">—</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<!-- ─── Auth Screen ─── -->
+<div id="authScreen">
+  <div class="auth-box">
+    <h2>&#128275; Sign In</h2>
+    <p>Use one of the demo accounts below</p>
+    <div class="form-group">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" placeholder="user@example.com"/>
+    </div>
+    <div class="form-group">
+      <label for="loginPass">Password</label>
+      <input id="loginPass" type="password" placeholder="password"/>
+    </div>
+    <button class="btn-login" onclick="login()">Sign In</button>
+    <div class="auth-err" id="authErr"></div>
+    <div class="demo-accounts">
+      <b>Demo Accounts</b>
+      <table id="demoTable">
+        <tr><td><b>admin@app.com</b></td><td>admin123</td><td><span class="role-badge badge-admin">Admin</span></td></tr>
+        <tr><td><b>editor@app.com</b></td><td>editor123</td><td><span class="role-badge badge-editor">Editor</span></td></tr>
+        <tr><td><b>user@app.com</b></td><td>user123</td><td><span class="role-badge badge-user">User</span></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Dashboard ─── -->
+<div id="dashboard">
+  <div class="dash-layout">
+    <nav class="sidebar" id="sidebar"></nav>
+    <div class="content" id="content">
+
+      <!-- Overview Page -->
+      <div class="page" id="page-overview">
+        <div class="page-header"><h1>&#128200; Overview</h1></div>
+        <div class="stats-row" id="statsRow"></div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>Activity</th><th>Time</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Article published</td><td>2 min ago</td><td>&#10003; Done</td></tr>
+              <tr><td>User registered</td><td>15 min ago</td><td>&#10003; Done</td></tr>
+              <tr><td>Settings updated</td><td>1 hr ago</td><td>&#10003; Done</td></tr>
+              <tr><td>Backup created</td><td>3 hr ago</td><td>&#10003; Done</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Content Management Page -->
+      <div class="page" id="page-content">
+        <div class="page-header"><h1>&#128196; Content</h1></div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Status</th><th id="actionHeader">Actions</th></tr></thead>
+            <tbody id="contentTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- User Management Page -->
+      <div class="page" id="page-users">
+        <div class="page-header"><h1>&#128100; Users</h1></div>
+        <div class="data-table">
+          <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+            <tbody id="usersTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settings Page -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><h1>&#9881; Settings</h1></div>
+        <div id="settingsContent"></div>
+      </div>
+
+      <!-- My Profile Page -->
+      <div class="page" id="page-profile">
+        <div class="page-header"><h1>&#128100; My Profile</h1></div>
+        <div id="profileContent"></div>
+      </div>
+
+      <!-- Access Rights Page -->
+      <div class="page" id="page-access">
+        <div class="page-header"><h1>&#128274; Access Rights</h1></div>
+        <div id="accessContent"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ─── Users DB ─── */
+  const USERS = [
+    { id:1, name:"Alice Admin",  email:"admin@app.com",  password:"admin123",  role:"admin",  avatar:"AA" },
+    { id:2, name:"Eddie Editor", email:"editor@app.com", password:"editor123", role:"editor", avatar:"EE" },
+    { id:3, name:"Ursula User",  email:"user@app.com",   password:"user123",   role:"user",   avatar:"UU" },
+  ];
+
+  const CONTENT_ROWS = [
+    { title:"Getting Started Guide", cat:"Tutorial",    status:"Published" },
+    { title:"API Reference v3",      cat:"Docs",        status:"Draft"     },
+    { title:"Release Notes 2.0",     cat:"News",        status:"Published" },
+    { title:"Migration Guide",       cat:"Tutorial",    status:"Draft"     },
+  ];
+
+  /* ─── Permissions ─── */
+  const PERMISSIONS = {
+    admin:  { pages:["overview","content","users","settings","profile","access"], canEdit:true,  canDelete:true,  canPublish:true,  canManageUsers:true  },
+    editor: { pages:["overview","content","profile","access"],                     canEdit:true,  canDelete:false, canPublish:true,  canManageUsers:false },
+    user:   { pages:["overview","profile","access"],                               canEdit:false, canDelete:false, canPublish:false, canManageUsers:false },
+  };
+
+  /* ─── Nav config ─── */
+  const NAV_ITEMS = [
+    { id:"overview", icon:"&#128200;", label:"Overview"   },
+    { id:"content",  icon:"&#128196;", label:"Content"    },
+    { id:"users",    icon:"&#128100;", label:"Users"      },
+    { id:"settings", icon:"&#9881;",   label:"Settings"   },
+    { id:"profile",  icon:"&#128100;", label:"My Profile" },
+    { id:"access",   icon:"&#128274;", label:"Access"     },
+  ];
+
+  /* ─── State ─── */
+  let currentUser = null;
+  let currentPage = "overview";
+
+  /* ─── Fill demo table click ─── */
+  document.querySelectorAll("#demoTable tr").forEach((tr, i) => {
+    tr.addEventListener("click", () => {
+      const u = USERS[i];
+      document.getElementById("loginEmail").value = u.email;
+      document.getElementById("loginPass").value  = u.password;
+    });
+  });
+
+  /* ─── Login ─── */
+  function login() {
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const pass  = document.getElementById("loginPass").value;
+    const user  = USERS.find(u => u.email === email && u.password === pass);
+    if (!user) { document.getElementById("authErr").textContent = "Invalid credentials."; return; }
+    currentUser = user;
+    document.getElementById("authScreen").style.display  = "none";
+    document.getElementById("dashboard").style.display   = "flex";
+    document.getElementById("topUserInfo").style.display = "flex";
+    document.getElementById("topUserName").textContent   = user.name;
+    const badge = document.getElementById("topRoleBadge");
+    badge.textContent  = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+    badge.className    = `role-badge badge-${user.role}`;
+    buildSidebar();
+    navigateTo("overview");
+  }
+
+  function logout() {
+    currentUser = null;
+    document.getElementById("authScreen").style.display  = "flex";
+    document.getElementById("dashboard").style.display   = "none";
+    document.getElementById("topUserInfo").style.display = "none";
+    document.getElementById("loginEmail").value = "";
+    document.getElementById("loginPass").value  = "";
+    document.getElementById("authErr").textContent = "";
+  }
+
+  /* ─── Sidebar ─── */
+  function buildSidebar() {
+    const perms = PERMISSIONS[currentUser.role];
+    document.getElementById("sidebar").innerHTML = NAV_ITEMS.map(item => {
+      const allowed = perms.pages.includes(item.id);
+      return `<button class="nav-item ${allowed ? "" : "locked"}"
+                      onclick="${allowed ? `navigateTo('${item.id}')` : "showAccessDenied()"}"
+                      aria-label="${item.label}">
+                <span>${item.icon}</span>
+                <span class="label">${item.label}</span>
+                ${!allowed ? '<span class="lock-icon">&#128274;</span>' : ""}
+              </button>`;
+    }).join("");
+  }
+
+  function highlightNav(id) {
+    document.querySelectorAll(".sidebar .nav-item").forEach((btn, i) => {
+      btn.classList.toggle("active", NAV_ITEMS[i]?.id === id);
+    });
+  }
+
+  /* ─── Navigation ─── */
+  function navigateTo(pageId) {
+    const perms = PERMISSIONS[currentUser.role];
+    if (!perms.pages.includes(pageId)) { showAccessDenied(); return; }
+    currentPage = pageId;
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(`page-${pageId}`).classList.add("active");
+    highlightNav(pageId);
+    if (pageId === "overview")  renderOverview();
+    if (pageId === "content")   renderContentPage();
+    if (pageId === "users")     renderUsersPage();
+    if (pageId === "settings")  renderSettingsPage();
+    if (pageId === "profile")   renderProfilePage();
+    if (pageId === "access")    renderAccessPage();
+  }
+
+  function showAccessDenied() {
+    alert("&#128274; Access Denied! You do not have permission to view this page.");
+  }
+
+  /* ─── Overview ─── */
+  function renderOverview() {
+    const data = [
+      { icon:"&#128100;", val: USERS.length, lbl:"Total Users"    },
+      { icon:"&#128196;", val: CONTENT_ROWS.length, lbl:"Articles"  },
+      { icon:"&#9881;",   val: 3,             lbl:"Active Roles"  },
+      { icon:"&#128274;", val: 12,            lbl:"Permissions"   },
+    ];
+    document.getElementById("statsRow").innerHTML = data.map(d =>
+      `<div class="stat-card"><div class="sc-icon">${d.icon}</div><div class="sc-val">${d.val}</div><div class="sc-lbl">${d.lbl}</div></div>`
+    ).join("");
+  }
+
+  /* ─── Content Page ─── */
+  function renderContentPage() {
+    const perms = PERMISSIONS[currentUser.role];
+    document.getElementById("contentTable").innerHTML = CONTENT_ROWS.map((r, i) =>
+      `<tr>
+        <td>${r.title}</td>
+        <td>${r.cat}</td>
+        <td>${r.status}</td>
+        <td>
+          <button class="action-btn btn-view">&#128065; View</button>
+          ${perms.canEdit    ? `<button class="action-btn btn-edit">&#9998; Edit</button>` : ""}
+          ${perms.canPublish ? `<button class="action-btn btn-pub">&#9654; Publish</button>` : ""}
+          ${perms.canDelete  ? `<button class="action-btn btn-delete" onclick="deleteContent(${i})">&#128465; Delete</button>` : ""}
+        </td>
+      </tr>`
+    ).join("");
+  }
+
+  function deleteContent(i) {
+    if (confirm(`Delete "${CONTENT_ROWS[i].title}"?`)) {
+      CONTENT_ROWS.splice(i, 1);
+      renderContentPage();
+    }
+  }
+
+  /* ─── Users Page ─── */
+  function renderUsersPage() {
+    const perms = PERMISSIONS[currentUser.role];
+    if (!perms.canManageUsers) {
+      document.getElementById("usersTable").innerHTML = `<tr><td colspan="4"><div class="access-denied"><div class="icon">&#128274;</div><p>Admin access required.</p></div></td></tr>`;
+      return;
+    }
+    document.getElementById("usersTable").innerHTML = USERS.map(u =>
+      `<tr>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+        <td><span class="role-badge badge-${u.role}">${u.role}</span></td>
+        <td>
+          <button class="action-btn btn-edit">&#9998; Edit</button>
+          <button class="action-btn btn-delete">&#128465; Remove</button>
+        </td>
+      </tr>`
+    ).join("");
+  }
+
+  /* ─── Settings Page ─── */
+  function renderSettingsPage() {
+    const perms = PERMISSIONS[currentUser.role];
+    document.getElementById("settingsContent").innerHTML = perms.canManageUsers
+      ? `<div class="access-section">
+           <h3>Site Settings</h3>
+           <p style="color:#718096;font-size:.9rem">Full system settings available to Admins.</p>
+           <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.8rem">
+             <label style="font-size:.88rem;color:#4a5568;font-weight:600">Site Name<br>
+               <input type="text" value="RBAC Portal" style="margin-top:.3rem;padding:.5rem .8rem;border:1.5px solid #e2e8f0;border-radius:8px;width:100%;max-width:320px"/></label>
+             <label style="font-size:.88rem;color:#4a5568;font-weight:600">Maintenance Mode
+               <select style="margin-top:.3rem;padding:.5rem .8rem;border:1.5px solid #e2e8f0;border-radius:8px;min-width:120px">
+                 <option>Disabled</option><option>Enabled</option></select></label>
+           </div>
+         </div>`
+      : `<div class="access-denied"><div class="icon">&#128274;</div><p>Admin access required to change settings.</p></div>`;
+  }
+
+  /* ─── Profile Page ─── */
+  function renderProfilePage() {
+    const u = currentUser;
+    document.getElementById("profileContent").innerHTML = `
+      <div class="profile-card">
+        <div class="pc-header">
+          <div class="avatar">${u.avatar}</div>
+          <div class="pc-info">
+            <div class="pc-name">${u.name}</div>
+            <div class="pc-email">${u.email}</div>
+          </div>
+        </div>
+        <p style="font-size:.85rem;color:#718096;margin-bottom:.8rem">
+          Role: <span class="role-badge badge-${u.role}">${u.role}</span>
+        </p>
+        <button class="btn-login" style="max-width:180px;font-size:.85rem;padding:.55rem">
+          &#9998; Edit Profile
+        </button>
+      </div>`;
+  }
+
+  /* ─── Access Rights Page ─── */
+  function renderAccessPage() {
+    const perms = PERMISSIONS[currentUser.role];
+    const all = [
+      { label:"View Content",    key:"pages",           note: perms.pages.includes("content") },
+      { label:"Edit Content",    key:"canEdit",         note: perms.canEdit },
+      { label:"Delete Content",  key:"canDelete",       note: perms.canDelete },
+      { label:"Publish Content", key:"canPublish",      note: perms.canPublish },
+      { label:"Manage Users",    key:"canManageUsers",  note: perms.canManageUsers },
+      { label:"System Settings", key:"canManageUsers",  note: perms.canManageUsers },
+    ];
+    document.getElementById("accessContent").innerHTML = `
+      <div class="access-section">
+        <h3>Your Permissions (${currentUser.role})</h3>
+        <div class="perm-grid">
+          ${all.map(p => `
+            <div class="perm-item ${p.note ? "perm-allow" : "perm-deny"}">
+              ${p.note ? "&#10003;" : "&#10007;"} ${p.label}
+            </div>`).join("")}
+        </div>
+      </div>
+      <div class="access-section">
+        <h3>All Roles Summary</h3>
+        <table><thead><tr><th>Role</th><th>Edit</th><th>Delete</th><th>Publish</th><th>Manage Users</th></tr></thead>
+        <tbody>
+          ${["admin","editor","user"].map(r => {
+            const p = PERMISSIONS[r];
+            const tick = v => v ? "&#10003;" : "&#10007;";
+            return `<tr>
+              <td><span class="role-badge badge-${r}">${r}</span></td>
+              <td>${tick(p.canEdit)}</td>
+              <td>${tick(p.canDelete)}</td>
+              <td>${tick(p.canPublish)}</td>
+              <td>${tick(p.canManageUsers)}</td>
+            </tr>`;
+          }).join("")}
+        </tbody></table>
+      </div>`;
+  }
+</script>
+</body>
+</html>

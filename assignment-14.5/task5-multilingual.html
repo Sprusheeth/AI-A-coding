@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-Language Website</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #4361ee;
+      --dark:   #1a1a2e;
+      --text:   #333;
+      --bg:     #f5f7ff;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* RTL support */
+    body[dir="rtl"] { font-family: 'Segoe UI', Arial, sans-serif; }
+
+    /* ─── HEADER ─── */
+    header {
+      background: var(--dark);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: .7rem;
+    }
+    header .brand {
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+    }
+    nav.main-nav {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    nav.main-nav a {
+      color: #a0aec0;
+      text-decoration: none;
+      font-size: .9rem;
+      transition: color .2s;
+      cursor: pointer;
+    }
+    nav.main-nav a:hover { color: #fff; }
+
+    /* ─── Language Switcher ─── */
+    .lang-switcher {
+      display: flex;
+      gap: .4rem;
+      flex-wrap: wrap;
+    }
+    .lang-btn {
+      padding: .3rem .75rem;
+      border: 1.5px solid #555;
+      background: transparent;
+      color: #ccc;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: .78rem;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: .3rem;
+    }
+    .lang-btn:hover   { border-color: #fff; color: #fff; }
+    .lang-btn.active  { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+      color: #fff;
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+    }
+    .hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); margin-bottom: 1rem; }
+    .hero p  { font-size: 1.1rem; opacity: .9; max-width: 600px; margin: 0 auto 2rem; line-height: 1.7; }
+    .hero .btn-hero {
+      padding: .85rem 2.4rem;
+      background: #fff;
+      color: var(--accent);
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .hero .btn-hero:hover { transform: scale(1.04); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+
+    /* ─── MAIN CONTENT ─── */
+    main {
+      flex: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      width: 100%;
+    }
+
+    /* Features */
+    .section-title {
+      text-align: center;
+      font-size: 1.8rem;
+      color: var(--dark);
+      margin-bottom: .5rem;
+    }
+    .section-sub {
+      text-align: center;
+      color: #718096;
+      margin-bottom: 2.5rem;
+      font-size: .95rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+    .feature-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.8rem;
+      box-shadow: 0 3px 16px rgba(0,0,0,.07);
+      transition: transform .25s;
+    }
+    .feature-card:hover { transform: translateY(-4px); }
+    .feature-icon { font-size: 2rem; margin-bottom: .8rem; }
+    .feature-card h3 { font-size: 1rem; color: var(--dark); margin-bottom: .5rem; }
+    .feature-card p  { font-size: .85rem; color: #718096; line-height: 1.6; }
+
+    /* Testimonials */
+    .testimonials { margin-bottom: 4rem; }
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.3rem;
+    }
+    .test-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1.4rem;
+      box-shadow: 0 3px 14px rgba(0,0,0,.07);
+    }
+    .test-card .quote { font-size: .9rem; color: #4a5568; line-height: 1.7; margin-bottom: 1rem; }
+    .test-card .author { display: flex; align-items: center; gap: .7rem; }
+    .test-card .av { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; }
+    .test-card .aname { font-weight: 600; font-size: .85rem; color: var(--dark); }
+
+    /* CTA */
+    .cta-section {
+      background: linear-gradient(135deg, #4361ee, #3a0ca3);
+      border-radius: 18px;
+      padding: 3rem 2rem;
+      text-align: center;
+      color: #fff;
+      margin-bottom: 3rem;
+    }
+    .cta-section h2 { font-size: 1.6rem; margin-bottom: .5rem; }
+    .cta-section p  { opacity: .85; margin-bottom: 1.5rem; }
+    .cta-section button {
+      padding: .75rem 2.2rem;
+      background: #fff;
+      color: var(--accent);
+      border: none;
+      border-radius: 25px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--dark);
+      color: #a0aec0;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .85rem;
+    }
+
+    /* Accessibility: skip link */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 1rem;
+      background: var(--accent);
+      color: #fff;
+      padding: .5rem 1rem;
+      border-radius: 0 0 8px 8px;
+      transition: top .2s;
+      z-index: 999;
+      text-decoration: none;
+    }
+    .skip-link:focus { top: 0; }
+
+    @media(max-width:600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      nav.main-nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link" data-i18n="skip">Skip to content</a>
+
+<header>
+  <div class="brand">&#127760; <span data-i18n="brand">GlobalSite</span></div>
+  <nav class="main-nav" aria-label="Main navigation">
+    <a data-i18n="nav_home">Home</a>
+    <a data-i18n="nav_features">Features</a>
+    <a data-i18n="nav_about">About</a>
+    <a data-i18n="nav_contact">Contact</a>
+  </nav>
+  <div class="lang-switcher" role="group" aria-label="Language selector">
+    <button class="lang-btn" data-lang="en">&#127482;&#127480; EN</button>
+    <button class="lang-btn" data-lang="es">&#127466;&#127480; ES</button>
+    <button class="lang-btn" data-lang="fr">&#127467;&#127479; FR</button>
+    <button class="lang-btn" data-lang="de">&#127465;&#127466; DE</button>
+    <button class="lang-btn" data-lang="ar">&#127462;&#127479; AR</button>
+    <button class="lang-btn" data-lang="zh">&#127464;&#127475; ZH</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero" aria-label="Hero">
+  <h1 data-i18n="hero_title">Welcome to GlobalSite</h1>
+  <p data-i18n="hero_sub">Experience the web in your language. Seamlessly switch between 6 languages with full RTL support and persistent preferences.</p>
+  <button class="btn-hero" data-i18n="hero_btn">Get Started</button>
+</section>
+
+<!-- Main -->
+<main id="main-content">
+
+  <!-- Features -->
+  <section class="features-section" aria-labelledby="feat-title">
+    <h2 class="section-title" id="feat-title" data-i18n="feat_title">Our Features</h2>
+    <p class="section-sub" data-i18n="feat_sub">Discover what makes our platform exceptional.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#127760;</div>
+        <h3 data-i18n="f1_title">Multilingual</h3>
+        <p data-i18n="f1_desc">6 languages with RTL/LTR switching. Locale persisted in localStorage for a seamless return experience.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9889;</div>
+        <h3 data-i18n="f2_title">Lightning Fast</h3>
+        <p data-i18n="f2_desc">Optimised assets, lazy loading, and minimal dependencies for sub-second load times worldwide.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#127759;</div>
+        <h3 data-i18n="f3_title">Responsive</h3>
+        <p data-i18n="f3_desc">Designed mobile-first. Looks perfect on every screen size from watch to 4K monitor.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9855;</div>
+        <h3 data-i18n="f4_title">Accessible</h3>
+        <p data-i18n="f4_desc">WCAG 2.1 AA compliance. Skip links, ARIA labels, keyboard navigation, and high-contrast support.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials" aria-labelledby="test-title">
+    <h2 class="section-title" id="test-title" data-i18n="test_title">What People Say</h2>
+    <p class="section-sub" data-i18n="test_sub">Trusted by thousands around the world.</p>
+    <div class="test-grid">
+      <div class="test-card">
+        <p class="quote" data-i18n="t1_quote">"Switching languages is seamless. I love how my preference is remembered every visit!"</p>
+        <div class="author"><div class="av">MK</div><div><div class="aname">Maria K.</div><div style="font-size:.75rem;color:#aaa">Spain</div></div></div>
+      </div>
+      <div class="test-card">
+        <p class="quote" data-i18n="t2_quote">"The Arabic RTL layout is perfect and accessible. Best multilingual site I've used."</p>
+        <div class="author"><div class="av">AH</div><div><div class="aname">Ahmed H.</div><div style="font-size:.75rem;color:#aaa">Egypt</div></div></div>
+      </div>
+      <div class="test-card">
+        <p class="quote" data-i18n="t3_quote">"Clean design, fast performance, and works perfectly in Chinese. Impressive work!"</p>
+        <div class="author"><div class="av">LW</div><div><div class="aname">Li Wei</div><div style="font-size:.75rem;color:#aaa">China</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2 data-i18n="cta_title">Ready to go global?</h2>
+    <p data-i18n="cta_sub">Join thousands of users enjoying a localised experience.</p>
+    <button data-i18n="cta_btn">Sign Up Free</button>
+  </div>
+
+</main>
+
+<footer>
+  <p data-i18n="footer">&copy; 2026 GlobalSite. All rights reserved.</p>
+</footer>
+
+<script>
+  /* ─── Translations ─── */
+  const i18n = {
+    en: {
+      dir:"ltr", lang:"en",
+      skip:"Skip to content",
+      brand:"GlobalSite",
+      nav_home:"Home", nav_features:"Features", nav_about:"About", nav_contact:"Contact",
+      hero_title:"Welcome to GlobalSite",
+      hero_sub:"Experience the web in your language. Seamlessly switch between 6 languages with full RTL support and persistent preferences.",
+      hero_btn:"Get Started",
+      feat_title:"Our Features",
+      feat_sub:"Discover what makes our platform exceptional.",
+      f1_title:"Multilingual",    f1_desc:"6 languages with RTL/LTR switching. Locale persisted in localStorage for a seamless return experience.",
+      f2_title:"Lightning Fast",  f2_desc:"Optimised assets, lazy loading, and minimal dependencies for sub-second load times worldwide.",
+      f3_title:"Responsive",      f3_desc:"Designed mobile-first. Looks perfect on every screen size from watch to 4K monitor.",
+      f4_title:"Accessible",      f4_desc:"WCAG 2.1 AA compliance. Skip links, ARIA labels, keyboard navigation, and high-contrast support.",
+      test_title:"What People Say", test_sub:"Trusted by thousands around the world.",
+      t1_quote:'"Switching languages is seamless. I love how my preference is remembered every visit!"',
+      t2_quote:'"The Arabic RTL layout is perfect and accessible. Best multilingual site I\'ve used."',
+      t3_quote:'"Clean design, fast performance, and works perfectly in Chinese. Impressive work!"',
+      cta_title:"Ready to go global?",
+      cta_sub:"Join thousands of users enjoying a localised experience.",
+      cta_btn:"Sign Up Free",
+      footer:"© 2026 GlobalSite. All rights reserved.",
+    },
+    es: {
+      dir:"ltr", lang:"es",
+      skip:"Saltar al contenido",
+      brand:"GlobalSite",
+      nav_home:"Inicio", nav_features:"Funciones", nav_about:"Nosotros", nav_contact:"Contacto",
+      hero_title:"Bienvenido a GlobalSite",
+      hero_sub:"Vive internet en tu idioma. Cambia entre 6 idiomas con soporte RTL completo y preferencias persistentes.",
+      hero_btn:"Comenzar",
+      feat_title:"Nuestras Funciones",
+      feat_sub:"Descubre lo que hace excepcional a nuestra plataforma.",
+      f1_title:"Multilingüe",     f1_desc:"6 idiomas con cambio RTL/LTR. La configuración regional se guarda en localStorage.",
+      f2_title:"Ultrarrápido",    f2_desc:"Recursos optimizados y carga mínima para tiempos de carga inferiores a un segundo en todo el mundo.",
+      f3_title:"Responsivo",      f3_desc:"Diseño móvil primero. Se ve perfecto en cada tamaño de pantalla.",
+      f4_title:"Accesible",       f4_desc:"Cumple WCAG 2.1 AA. Contraste alto y navegación por teclado.",
+      test_title:"Lo que dicen", test_sub:"Miles de usuarios en todo el mundo confían en nosotros.",
+      t1_quote:'"¡Cambiar de idioma es muy sencillo. Me encanta que recuerde mi preferencia en cada visita!"',
+      t2_quote:'"El diseño RTL árabe es perfecto y accesible. El mejor sitio multilingüe que he usado."',
+      t3_quote:'"Diseño limpio, rendimiento rápido y funciona perfectamente en chino. ¡Trabajo impresionante!"',
+      cta_title:"¿Listo para ser global?",
+      cta_sub:"Únete a miles de usuarios disfrutando de una experiencia localizada.",
+      cta_btn:"Regístrate Gratis",
+      footer:"© 2026 GlobalSite. Todos los derechos reservados.",
+    },
+    fr: {
+      dir:"ltr", lang:"fr",
+      skip:"Aller au contenu",
+      brand:"GlobalSite",
+      nav_home:"Accueil", nav_features:"Fonctionnalités", nav_about:"À propos", nav_contact:"Contact",
+      hero_title:"Bienvenue sur GlobalSite",
+      hero_sub:"Naviguez sur le web dans votre langue. Basculez entre 6 langues avec support RTL complet et préférences persistantes.",
+      hero_btn:"Commencer",
+      feat_title:"Nos Fonctionnalités",
+      feat_sub:"Découvrez ce qui rend notre plateforme exceptionnelle.",
+      f1_title:"Multilingue",     f1_desc:"6 langues avec changement RTL/LTR. La locale est conservée dans localStorage.",
+      f2_title:"Ultra Rapide",    f2_desc:"Ressources optimisées et dépendances minimales pour des temps de chargement en dessous d'une seconde.",
+      f3_title:"Responsive",      f3_desc:"Conception mobile-first. Parfait sur tous les formats d'écran.",
+      f4_title:"Accessible",      f4_desc:"Conformité WCAG 2.1 AA, liens de saut, labels ARIA et navigation clavier.",
+      test_title:"Ce qu'ils disent", test_sub:"Des milliers d'utilisateurs nous font confiance.",
+      t1_quote:'"Le changement de langue est fluide. J\'adore que ma préférence soit mémorisée à chaque visite !"',
+      t2_quote:'"La mise en page RTL arabe est parfaite et accessible. Meilleur site multilingue que j\'ai utilisé."',
+      t3_quote:'"Design épuré, performance rapide et fonctionne parfaitement en chinois. Travail impressionnant !"',
+      cta_title:"Prêt à être mondial ?",
+      cta_sub:"Rejoignez des milliers d'utilisateurs pour une expérience localisée.",
+      cta_btn:"Inscription Gratuite",
+      footer:"© 2026 GlobalSite. Tous droits réservés.",
+    },
+    de: {
+      dir:"ltr", lang:"de",
+      skip:"Zum Inhalt springen",
+      brand:"GlobalSite",
+      nav_home:"Startseite", nav_features:"Funktionen", nav_about:"Über uns", nav_contact:"Kontakt",
+      hero_title:"Willkommen bei GlobalSite",
+      hero_sub:"Erleben Sie das Web in Ihrer Sprache. Wechseln Sie nahtlos zwischen 6 Sprachen mit RTL-Unterstützung und gespeicherten Einstellungen.",
+      hero_btn:"Jetzt starten",
+      feat_title:"Unsere Funktionen",
+      feat_sub:"Entdecken Sie, was unsere Plattform außergewöhnlich macht.",
+      f1_title:"Mehrsprachig",    f1_desc:"6 Sprachen mit RTL/LTR-Umschaltung. Spracheinstellung wird im localStorage gespeichert.",
+      f2_title:"Blitzschnell",   f2_desc:"Optimierte Assets und minimale Abhängigkeiten für weltweite Ladezeiten unter einer Sekunde.",
+      f3_title:"Responsiv",      f3_desc:"Mobile-first-Design. Sieht auf jeder Bildschirmgröße perfekt aus.",
+      f4_title:"Zugänglich",     f4_desc:"WCAG 2.1 AA konform. Hoher Kontrast und Tastaturnavigation.",
+      test_title:"Das sagen sie", test_sub:"Tausende von Nutzern weltweit vertrauen uns.",
+      t1_quote:'"Der Sprachwechsel ist nahtlos. Ich liebe es, dass meine Einstellung bei jedem Besuch gespeichert wird!"',
+      t2_quote:'"Das arabische RTL-Layout ist perfekt und zugänglich. Beste mehrsprachige Website, die ich je genutzt habe."',
+      t3_quote:'"Sauberes Design, schnelle Leistung und funktioniert auf Chinesisch einwandfrei. Beeindruckend!"',
+      cta_title:"Bereit für die Welt?",
+      cta_sub:"Schließe dich Tausenden von Nutzern an, die eine lokalisierte Erfahrung genießen.",
+      cta_btn:"Kostenlos registrieren",
+      footer:"© 2026 GlobalSite. Alle Rechte vorbehalten.",
+    },
+    ar: {
+      dir:"rtl", lang:"ar",
+      skip:"تخطى إلى المحتوى",
+      brand:"GlobalSite",
+      nav_home:"الرئيسية", nav_features:"المميزات", nav_about:"حولنا", nav_contact:"تواصل",
+      hero_title:"مرحباً بك في GlobalSite",
+      hero_sub:"تصفح الويب بلغتك. انتقل بسلاسة بين 6 لغات مع دعم كامل للكتابة من اليمين إلى اليسار وحفظ تفضيلاتك.",
+      hero_btn:"ابدأ الآن",
+      feat_title:"مميزاتنا",
+      feat_sub:"اكتشف ما يجعل منصتنا استثنائية.",
+      f1_title:"متعدد اللغات",  f1_desc:"6 لغات مع تبديل RTL/LTR. يتم حفظ اللغة في localStorage لتجربة سلسة.",
+      f2_title:"سريع للغاية",   f2_desc:"موارد محسّنة وتبعيات ضئيلة لأوقات تحميل أقل من ثانية في جميع أنحاء العالم.",
+      f3_title:"متجاوب",        f3_desc:"تصميم يبدأ من الجوال. يبدو مثالياً على كل حجم شاشة.",
+      f4_title:"سهل الوصول",    f4_desc:"مطابق لمعيار WCAG 2.1 AA مع تباين عالٍ وملاحة بلوحة المفاتيح.",
+      test_title:"ما يقوله الناس", test_sub:"يثق بنا الآلاف حول العالم.",
+      t1_quote:'"تبديل اللغات سلس للغاية. أحب كيف يتم تذكر تفضيلاتي في كل زيارة!"',
+      t2_quote:'"تخطيط RTL العربي مثالي ويسهل الوصول إليه. أفضل موقع متعدد اللغات استخدمته."',
+      t3_quote:'"تصميم نظيف، أداء سريع، ويعمل بشكل مثالي باللغة الصينية. عمل رائع!"',
+      cta_title:"هل أنت مستعد للانطلاق عالمياً؟",
+      cta_sub:"انضم إلى الآلاف من المستخدمين الذين يستمتعون بتجربة مُترجمة.",
+      cta_btn:"سجّل مجاناً",
+      footer:"© 2026 GlobalSite. جميع الحقوق محفوظة.",
+    },
+    zh: {
+      dir:"ltr", lang:"zh",
+      skip:"跳到内容",
+      brand:"GlobalSite",
+      nav_home:"首页", nav_features:"功能", nav_about:"关于我们", nav_contact:"联系",
+      hero_title:"欢迎来到 GlobalSite",
+      hero_sub:"用您的语言体验网络。在6种语言间无缝切换，完全支持RTL布局，偏好设置永久保存。",
+      hero_btn:"立即开始",
+      feat_title:"我们的功能",
+      feat_sub:"探索让我们的平台卓越的原因。",
+      f1_title:"多语言支持",  f1_desc:"支持6种语言，可切换RTL/LTR。语言偏好保存在localStorage中，体验更流畅。",
+      f2_title:"极速加载",    f2_desc:"优化资源与极少依赖，全球加载时间不足一秒。",
+      f3_title:"响应式设计",  f3_desc:"移动优先设计，在任何屏幕尺寸下都完美呈现。",
+      f4_title:"无障碍访问",  f4_desc:"符合WCAG 2.1 AA标准，支持高对比度与键盘导航。",
+      test_title:"用户评价", test_sub:"全球数千用户的信任之选。",
+      t1_quote:'"语言切换非常流畅。我喜欢每次访问都能记住我的偏好设置！"',
+      t2_quote:'"阿拉伯语RTL布局完美且易于访问。我用过最好的多语言网站。"',
+      t3_quote:'"设计简洁，性能快速，中文显示完美。令人印象深刻！"',
+      cta_title:"准备好走向全球了吗？",
+      cta_sub:"加入数千名享受本地化体验的用户。",
+      cta_btn:"免费注册",
+      footer:"© 2026 GlobalSite. 版权所有。",
+    },
+  };
+
+  /* ─── Apply language ─── */
+  function applyLanguage(lang) {
+    const t = i18n[lang] || i18n.en;
+    document.documentElement.lang = t.lang;
+    document.documentElement.dir  = t.dir;
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (t[key] !== undefined) el.innerHTML = t[key];
+    });
+    document.querySelectorAll(".lang-btn").forEach(btn =>
+      btn.classList.toggle("active", btn.dataset.lang === lang));
+    localStorage.setItem("preferred_lang", lang);
+  }
+
+  /* ─── Event listeners ─── */
+  document.querySelectorAll(".lang-btn").forEach(btn =>
+    btn.addEventListener("click", () => applyLanguage(btn.dataset.lang)));
+
+  /* ─── Init ─── */
+  const saved = localStorage.getItem("preferred_lang") || "en";
+  applyLanguage(saved);
+</script>
+</body>
+</html>

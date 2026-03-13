@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image Gallery</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f1a;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 1rem;
+    }
+    header h1 { font-size: 2.4rem; letter-spacing: 2px; color: #e0aaff; }
+    header p  { color: #aaa; margin-top: .4rem; }
+
+    /* Filter buttons */
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .6rem;
+      padding: 1.2rem 1rem;
+    }
+    .filters button {
+      padding: .45rem 1.2rem;
+      border: 2px solid #7b2ff7;
+      background: transparent;
+      color: #e0aaff;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: .9rem;
+      transition: background .25s, color .25s;
+    }
+    .filters button:hover,
+    .filters button.active {
+      background: #7b2ff7;
+      color: #fff;
+    }
+
+    /* Grid */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.2rem;
+      padding: 1rem 2rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .card {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      aspect-ratio: 4/3;
+      background: #1a1a2e;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .card:hover { transform: scale(1.03); box-shadow: 0 8px 32px rgba(123,47,247,.45); }
+    .card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s;
+    }
+    .card:hover img { transform: scale(1.1); }
+
+    /* Overlay */
+    .card .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.85) 0%, transparent 55%);
+      opacity: 0;
+      transition: opacity .35s;
+      display: flex;
+      align-items: flex-end;
+      padding: 1rem;
+    }
+    .card:hover .overlay { opacity: 1; }
+    .overlay-text { color: #fff; }
+    .overlay-text h3 { font-size: 1rem; margin-bottom: .25rem; }
+    .overlay-text span { font-size: .8rem; color: #c9b1ff; }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      flex-direction: column;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+      max-width: 90vw;
+      max-height: 75vh;
+      border-radius: 10px;
+      box-shadow: 0 0 40px rgba(123,47,247,.6);
+    }
+    .lightbox-caption {
+      margin-top: .8rem;
+      color: #ccc;
+      font-size: 1rem;
+    }
+    .lightbox-close {
+      position: fixed;
+      top: 1.2rem;
+      right: 1.5rem;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 1001;
+    }
+    .lightbox-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(123,47,247,.7);
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: .5rem .9rem;
+      border-radius: 6px;
+      z-index: 1001;
+    }
+    #lb-prev { left: 1rem; }
+    #lb-next { right: 1rem; }
+
+    /* Hidden class for filtering */
+    .card.hidden { display: none; }
+
+    @media(max-width: 600px) {
+      .gallery { padding: 1rem; }
+      header h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Photo Gallery</h1>
+  <p>Click any image to view full-screen</p>
+</header>
+
+<div class="filters">
+  <button class="active" data-filter="all">All</button>
+  <button data-filter="nature">Nature</button>
+  <button data-filter="city">City</button>
+  <button data-filter="abstract">Abstract</button>
+  <button data-filter="animals">Animals</button>
+</div>
+
+<div class="gallery" id="gallery"></div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
+  <button class="lightbox-close" id="lb-close" aria-label="Close">&times;</button>
+  <button class="lightbox-nav" id="lb-prev" aria-label="Previous">&#8249;</button>
+  <img id="lb-img" src="" alt="" />
+  <p class="lightbox-caption" id="lb-caption"></p>
+  <button class="lightbox-nav" id="lb-next" aria-label="Next">&#8250;</button>
+</div>
+
+<script>
+  const images = [
+    { src: "https://picsum.photos/seed/forest/600/450",   title: "Forest Path",      category: "nature"   },
+    { src: "https://picsum.photos/seed/mountain/600/450", title: "Mountain Peak",    category: "nature"   },
+    { src: "https://picsum.photos/seed/river/600/450",    title: "River Bend",       category: "nature"   },
+    { src: "https://picsum.photos/seed/city1/600/450",    title: "City Skyline",     category: "city"     },
+    { src: "https://picsum.photos/seed/city2/600/450",    title: "Night Lights",     category: "city"     },
+    { src: "https://picsum.photos/seed/bridge/600/450",   title: "Golden Bridge",    category: "city"     },
+    { src: "https://picsum.photos/seed/abstract1/600/450",title: "Fluid Forms",      category: "abstract" },
+    { src: "https://picsum.photos/seed/abstract2/600/450",title: "Color Waves",      category: "abstract" },
+    { src: "https://picsum.photos/seed/abstract3/600/450",title: "Geometry",         category: "abstract" },
+    { src: "https://picsum.photos/seed/fox/600/450",      title: "Red Fox",          category: "animals"  },
+    { src: "https://picsum.photos/seed/eagle/600/450",    title: "Soaring Eagle",    category: "animals"  },
+    { src: "https://picsum.photos/seed/deer/600/450",     title: "Gentle Deer",      category: "animals"  },
+  ];
+
+  const gallery  = document.getElementById("gallery");
+  const lightbox = document.getElementById("lightbox");
+  const lbImg    = document.getElementById("lb-img");
+  const lbCap    = document.getElementById("lb-caption");
+
+  let currentIdx = 0;
+  let visibleCards = [];
+
+  function buildGallery() {
+    gallery.innerHTML = "";
+    images.forEach((img, i) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.dataset.index = i;
+      card.dataset.category = img.category;
+      card.innerHTML = `
+        <img src="${img.src}" alt="${img.title}" loading="lazy"/>
+        <div class="overlay">
+          <div class="overlay-text">
+            <h3>${img.title}</h3>
+            <span>${img.category.charAt(0).toUpperCase() + img.category.slice(1)}</span>
+          </div>
+        </div>`;
+      card.addEventListener("click", () => openLightbox(i));
+      gallery.appendChild(card);
+    });
+  }
+
+  function filterGallery(category) {
+    const cards = gallery.querySelectorAll(".card");
+    cards.forEach(card => {
+      const match = category === "all" || card.dataset.category === category;
+      card.classList.toggle("hidden", !match);
+    });
+    visibleCards = [...cards].filter(c => !c.classList.contains("hidden"));
+  }
+
+  function openLightbox(idx) {
+    currentIdx = idx;
+    showImage(currentIdx);
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+
+  function showImage(idx) {
+    const img = images[idx];
+    lbImg.src = img.src;
+    lbImg.alt = img.title;
+    lbCap.textContent = `${img.title} — ${img.category}`;
+  }
+
+  document.getElementById("lb-close").addEventListener("click", closeLightbox);
+  document.getElementById("lb-prev").addEventListener("click", () => {
+    currentIdx = (currentIdx - 1 + images.length) % images.length;
+    showImage(currentIdx);
+  });
+  document.getElementById("lb-next").addEventListener("click", () => {
+    currentIdx = (currentIdx + 1) % images.length;
+    showImage(currentIdx);
+  });
+
+  lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener("keydown", e => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape")     closeLightbox();
+    if (e.key === "ArrowLeft")  { currentIdx = (currentIdx - 1 + images.length) % images.length; showImage(currentIdx); }
+    if (e.key === "ArrowRight") { currentIdx = (currentIdx + 1) % images.length; showImage(currentIdx); }
+  });
+
+  document.querySelectorAll(".filters button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".filters button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      filterGallery(btn.dataset.filter);
+    });
+  });
+
+  buildGallery();
+  filterGallery("all");
+</script>
+</body>
+</html>
