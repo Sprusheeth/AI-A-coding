@@ -1,0 +1,10 @@
+student_id,name,gender,department,marks,attendance,gender_encoded,department_encoded
+101,Alice,Female,Computer Science,85.0,92.0,0,0
+102,Bob,Male,Computer Science,81.5,85.0,1,0
+103,Charlie,Male,Physics,72.0,88.0,1,2
+104,Diana,Female,Mathematics,90.0,88.0,0,1
+105,Eve,Female,Physics,81.5,76.0,0,2
+106,Frank,Male,Computer Science,65.0,88.0,1,0
+107,Grace,Female,Computer Science,78.0,95.0,0,0
+108,Hank,Male,Mathematics,81.5,80.0,1,1
+109,Ivy,Female,Computer Science,88.0,91.0,0,0
