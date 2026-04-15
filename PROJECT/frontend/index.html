@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume.AI - Deep Analysis</title>
+    <!-- Modern Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- App Header -->
+    <header class="app-header">
+        <h1 class="app-title">⚡ Resume.AI</h1>
+        <p class="app-subtitle">Upload your resume and get deep, actionable insights instantly.</p>
+    </header>
+
+    <main class="container">
+        
+        <!-- Input Section -->
+        <section id="input-section" class="card">
+            <div class="split-layout">
+                <!-- Dropzone -->
+                <div class="upload-container">
+                    <label class="dropzone" id="dropzone">
+                        <input type="file" id="resumeFile" accept=".pdf" hidden />
+                        <div class="dropzone-text">
+                            <span class="icon">📁</span>
+                            <span class="primary-text">Click to upload or drag & drop</span>
+                            <span class="secondary-text">PDF files only (Max 5MB)</span>
+                        </div>
+                        <div id="file-name" class="file-name hidden"></div>
+                    </label>
+                </div>
+                
+                <!-- Job Desc -->
+                <div class="job-desc-container">
+                    <label for="jobDesc">🎯 Target Job Description (Optional)</label>
+                    <textarea id="jobDesc" placeholder="Paste the job description here for strict keyword matching..."></textarea>
+                </div>
+            </div>
+
+            <button id="analyzeBtn" class="primary-btn" disabled>
+                🚀 Analyze Resume
+            </button>
+            <div id="setup-warning" style="display:none; color: red; margin-top: 10px; font-size: 0.9rem;">
+                Note: Backend server at http://localhost:5000 is unreachable. Please run `python backend.py` first.
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section id="loading-section" class="card hidden">
+            <div class="loading-state">
+                <div class="spinner"></div>
+                <h3 id="loading-text">🤖 AI is analyzing your resume...</h3>
+                <p>Parsing document semantics and calculating scores. This will take a few seconds.</p>
+            </div>
+        </section>
+
+        <!-- Error State -->
+        <section id="error-section" class="card hidden border-red">
+            <h3 class="section-header">⚠️ Analysis Failed</h3>
+            <p id="error-message"></p>
+            <button id="retryBtn" class="secondary-btn">Try Again</button>
+        </section>
+
+        <!-- Results Section (Tabs) -->
+        <section id="results-section" class="hidden">
+            
+            <div class="tabs-container">
+                <button class="tab-btn active" data-tab="tab-analysis">📊 Analysis Report</button>
+                <button class="tab-btn" data-tab="tab-suggestions">💡 Suggestions</button>
+                <button class="tab-btn" data-tab="tab-raw">📋 Raw Data</button>
+                <button class="tab-btn" data-tab="tab-prompts">🤖 Prompts Showcase</button>
+            </div>
+
+            <!-- Tab 1: Analysis -->
+            <div id="tab-analysis" class="tab-pane active">
+                
+                <div class="top-row">
+                    <!-- Score Card -->
+                    <div id="score-card" class="card score-wrapper">
+                        <div class="section-header">⭐ Overall Score</div>
+                        <div class="score-display">
+                            <span id="score-val" class="score-badge">0</span>
+                            <span class="score-max">/100</span>
+                        </div>
+                        <p id="score-explanation" class="score-desc"></p>
+                    </div>
+                    
+                    <!-- Chart Card -->
+                    <div class="card chart-wrapper border-blue">
+                        <div class="section-header">📈 Score Breakdown</div>
+                        <div class="canvas-container">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="three-col-row">
+                    <!-- Skills -->
+                    <div class="card border-purple">
+                        <div class="section-header">🛠️ Skills Detected</div>
+                        <div id="skills-container" class="chip-container"></div>
+                    </div>
+                    
+                    <!-- Education -->
+                    <div class="card border-blue">
+                        <div class="section-header">🎓 Education</div>
+                        <ul id="education-list" class="styled-list"></ul>
+                    </div>
+                    
+                    <!-- Experience -->
+                    <div class="card border-blue">
+                        <div class="section-header">💼 Experience</div>
+                        <ul id="experience-list" class="styled-list"></ul>
+                    </div>
+                </div>
+
+                <div class="two-col-row">
+                    <!-- Strengths -->
+                    <div class="card border-green">
+                        <div class="section-header">✅ Key Strengths</div>
+                        <ul id="strengths-list" class="styled-list no-markers"></ul>
+                    </div>
+                    
+                    <!-- Weaknesses -->
+                    <div class="card border-red">
+                        <div class="section-header">⚠️ Areas for Improvement</div>
+                        <ul id="weaknesses-list" class="styled-list no-markers"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Suggestions -->
+            <div id="tab-suggestions" class="tab-pane hidden">
+                <div class="card border-amber">
+                    <div class="section-header">💡 Actionable Suggestions</div>
+                    <ol id="suggestions-list" class="styled-list block-list"></ol>
+                </div>
+
+                <div id="missing-skills-container" class="card border-red hidden">
+                    <div class="section-header">🔴 Missing / Recommended Skills</div>
+                    <div id="missing-chips" class="chip-container"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Raw Data -->
+            <div id="tab-raw" class="tab-pane hidden">
+                <div class="card border-blue">
+                    <div class="section-header">📋 Extracted Resume Text</div>
+                    <textarea id="raw-text" readonly class="code-area"></textarea>
+                </div>
+            </div>
+
+            <!-- Tab 4: Prompts Showcase Dummy -->
+            <div id="tab-prompts" class="tab-pane hidden">
+                <div class="card border-purple">
+                    <div class="section-header">🤖 System Prompts (Showcase)</div>
+                    <p class="score-desc" style="text-align: left; margin-bottom: 1.5rem;">
+                        <i>Note: The actual application architecture consolidates these into a single high-efficiency prompt to minimize latency and optimize token bandwidth. These logic models are presented for illustrative showcase purposes only.</i>
+                    </p>
+
+                    <h4 style="margin-bottom: 0.5rem; color: var(--primary);">PROMPT 1 - Resume Analysis</h4>
+                    <pre class="code-area" style="height: auto; padding: 1rem; margin-bottom: 1.5rem;">Analyze this resume text and extract skills, education, and experience.
+Also identify strengths and weaknesses.
+
+Resume: {resume_text}
+
+Respond in this exact JSON format:
+{ "skills": [...], "education":[...], "experience": [...], "strengths": [...], "weaknesses": [...] }</pre>
+
+                    <h4 style="margin-bottom: 0.5rem; color: var(--amber);">PROMPT 2 - Resume Scoring</h4>
+                    <pre class="code-area" style="height: auto; padding: 1rem; margin-bottom: 1.5rem;">Based on the resume content, give a score out of 100 and explain why.
+
+Resume: {resume_text}
+
+Respond in this exact JSON format:
+{ "score": &lt;0-100&gt;, "score_breakdown": { "skills": &lt;0-25&gt;, "experience": &lt;0-25&gt;, "education": &lt;0-25&gt;, "formatting": &lt;0-25&gt; }, "explanation": "..." }</pre>
+
+                    <h4 style="margin-bottom: 0.5rem; color: var(--green);">PROMPT 3 - Improvement Suggestions</h4>
+                    <pre class="code-area" style="height: auto; padding: 1rem;">Suggest improvements to make this resume better for software engineering roles.
+Target Job Description (optional): {job_desc}
+
+Resume: {resume_text}
+
+Respond in this exact JSON format:
+{ "suggestions": ["suggestion 1", "suggestion 2", ...], "missing_skills": ["skill1", "skill2", ...] }</pre>
+                </div>
+            </div>
+
+            <!-- Download PDF Button can go here -->
+            <div class="download-container">
+                 <button id="downloadBtn" class="secondary-btn">📥 Download Full Report Summary</button>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
